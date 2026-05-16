@@ -10,6 +10,12 @@
     #__bundler_thumbnail { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f9f8f6; z-index: 9999; }
     #__bundler_thumbnail svg { width: 100%; height: 100%; object-fit: contain; }
     #__bundler_placeholder { color: #999; font-size: 14px; }
+    #docustruct_nav { position: fixed; top: 0; right: 0; left: 0; background: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 9000; }
+    #docustruct_nav a { display: inline-block; padding: 8px 16px; margin-left: 12px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500; }
+    #docustruct_nav .docustruct_login { color: #4f46e5; cursor: pointer; }
+    #docustruct_nav .docustruct_login:hover { background: #f0f0ff; }
+    #docustruct_nav .docustruct_signup { background: #4f46e5; color: white; cursor: pointer; }
+    #docustruct_nav .docustruct_signup:hover { background: #4040d0; }
   </style>
   <noscript>
     <style>#__bundler_loading { display: none; }</style>
@@ -19,6 +25,13 @@
   </noscript>
 </head>
 <body>
+  <div id="docustruct_nav">
+    <div style="font-weight: 600; font-size: 16px; color: #1a1814;">DocuStruct</div>
+    <div>
+      <a class="docustruct_login" onclick="window.location.href='/login'">Sign In</a>
+      <a class="docustruct_signup" onclick="window.location.href='/signup'">Get Started</a>
+    </div>
+  </div>
   <div id="__bundler_thumbnail">
   <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
     <!-- Brand mark -->
