@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# Local data
+server/data/docustruct.sqlite
+server/data/docustruct.sqlite-journal
+server/data/uploads/*
+!server/data/uploads/.gitkeep

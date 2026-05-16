@@ -1,0 +1,31 @@
+{
+  "name": "docustruct-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "seed": "node src/seed.js",
+    "extract": "node src/scripts/runExtraction.js",
+    "reset": "node src/scripts/resetMappings.js",
+    "clear-data": "node src/scripts/clearData.js",
+    "inspect": "node src/scripts/inspect.js",
+    "test": "node src/extraction/cleaners.test.mjs && node src/extraction/engine.test.mjs && node src/extraction/subcell.test.mjs && node src/extraction/multisample.test.mjs",
+    "test:ai": "node src/extraction/aiEscalation.test.mjs",
+    "test:migration": "node test-migration.js",
+    "test:phase2": "node test-phase2.js",
+    "test:phase4": "node test-phase4.js",
+    "inspect-templates": "node src/scripts/inspectTemplates.js",
+    "fix-bcbs-patterns": "node src/scripts/fixBCBSPatterns.js",
+    "dump-pdf": "node src/scripts/dumpPdfText.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1",
+    "pdfjs-dist": "^4.7.76"
+  }
+}

@@ -1,0 +1,39 @@
+# /etc/systemd/system/docustruct.service
+#
+# Run DocuStruct as a long-lived systemd service. Restarts on crash, starts
+# on boot, logs to journalctl.
+#
+# Install:
+#   sudo cp deploy/docustruct.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now docustruct
+#
+# Logs:    journalctl -u docustruct -f
+# Status:  systemctl status docustruct
+# Restart: sudo systemctl restart docustruct
+
+[Unit]
+Description=DocuStruct API + client
+After=network.target
+
+[Service]
+Type=simple
+User=docustruct
+Group=docustruct
+WorkingDirectory=/opt/docustruct/server
+EnvironmentFile=/opt/docustruct/.env
+ExecStart=/usr/bin/node src/index.js
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+# Hardening — uncomment after a clean first run.
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=strict
+# ReadWritePaths=/opt/docustruct/server/data
+# ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

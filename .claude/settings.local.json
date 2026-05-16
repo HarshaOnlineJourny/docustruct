@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm list *)",
+      "Bash(cd /d/Claude/Projects/DocuStruct/server && ls -lah | head -20)",
+      "Bash(node test-migration.js)",
+      "Bash(rm -f server/data/docustruct.sqlite* && node test-migration.js 2>&1)",
+      "Bash(rm -f /d/Claude/Projects/DocuStruct/server/data/docustruct.sqlite*)",
+      "Bash(node /d/Claude/Projects/DocuStruct/server/test-migration.js)",
+      "Bash(node /d/Claude/Projects/DocuStruct/server/test-phase2.js)",
+      "Bash(npm --prefix server run test:phase4)",
+      "Bash(node -e \"import\\('./src/db.js'\\).then\\(m => console.log\\(m.db.prepare\\(\\\\\"SELECT name FROM sqlite_master WHERE type='table' ORDER BY name\\\\\"\\).all\\(\\)\\)\\)\")",
+      "Bash(rm -f /d/Claude/Projects/DocuStruct/server/data/docustruct.sqlite* && npm --prefix server run test:phase4 2>&1 | tail -100)",
+      "Bash(node -e \"import\\('./server/src/db.js'\\).then\\(m => console.log\\(m.db.prepare\\(\\\\\"PRAGMA table_info\\(corrections\\)\\\\\"\\).all\\(\\)\\)\\)\")",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)",
+      "Bash(echo github-auth-configured)",
+      "Bash(chmod 600 ~/.git-credentials)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Bash(cd \"D:\\\\Claude\\\\Projects\\\\DocuStruct\" && rm -rf .git && git init && git config user.name \"Harsha OnlineJourny\" && git config user.email \"harsha@github.com\" && git branch -M main && git remote add origin https://github.com/HarshaOnlineJourny/docustruct.git && echo \"Git reinitialized\")"
+    ]
+  }
+}

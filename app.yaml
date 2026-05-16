@@ -1,0 +1,14 @@
+name: docustruct
+services:
+- name: api
+  github:
+    repo: HarshaOnlineJourny/docustruct
+    branch: main
+  build_command: cd server && npm install
+  run_command: cd server && npm start
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "3000"
+  http_port: 3000
