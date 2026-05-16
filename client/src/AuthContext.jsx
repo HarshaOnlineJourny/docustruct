@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      const token = data.session?.id || data.session_id;
+      const token = data.session || data.session_id;
 
       setSessionToken(token);
       setUser(data.user);
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      const token = data.session?.id || data.session_id;
+      const token = data.session || data.session_id;
 
       setSessionToken(token);
       setUser(data.user);

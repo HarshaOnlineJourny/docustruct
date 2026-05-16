@@ -4,7 +4,7 @@ import {
   isValidEmail, isStrongPassword
 } from '../auth.js';
 import {
-  createOrganization, getUserByEmail, createUser, getUser,
+  createOrganization, getOrganization, getUserByEmail, createUser, getUser,
   createSession, getSession, deleteSession
 } from '../db.js';
 
@@ -73,10 +73,10 @@ router.post('/login', (req, res) => {
     const sessionExpiry = expiresAt(24);
     createSession(sessionId, user.id, user.organization_id, sessionExpiry);
 
-    const org = { id: user.organization_id }; // Minimal org info
+    const org = getOrganization(user.organization_id);
     return res.json({
       user: { id: user.id, email: user.email, role: user.role },
-      organization: org,
+      organization: { id: org.id, name: org.name },
       session: sessionId,
     });
   } catch (err) {
