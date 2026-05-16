@@ -1,43 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../AuthContext.jsx';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    }
+
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
+
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Login failed');
-        setLoading(false);
-        return;
-      }
-
-      // Store session token
-      localStorage.setItem('session_token', data.session);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('org', JSON.stringify(data.organization));
-
-      // Redirect to dashboard
+      await login(email, password);
+      // Navigate to dashboard on success (handled by AuthContext)
       navigate('/dashboard');
     } catch (err) {
-      console.error('[login]', err);
-      setError('Network error. Please try again.');
+      setErrors({ general: err.message || 'Login failed. Please check your credentials.' });
+    } finally {
       setLoading(false);
     }
   };
@@ -45,6 +59,7 @@ export default function Login() {
   return (
     <div className="auth-page">
       <div className="auth-container">
+        {/* Brand */}
         <div className="auth-brand">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="2" y="3" width="14" height="18" rx="2" stroke="#a5b4fc" strokeWidth="1.6" />
@@ -55,44 +70,85 @@ export default function Login() {
           <h1>DocuStruct</h1>
         </div>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="auth-form">
-          <h2>Log in</h2>
+          <h2>Sign in to your account</h2>
+          <p className="auth-form-subtitle">
+            Welcome back. Enter your details to get started.
+          </p>
 
-          {error && <div className="auth-error">{error}</div>}
+          {/* General error */}
+          {errors.general && (
+            <div className="form-alert form-alert-error">
+              {errors.general}
+            </div>
+          )}
 
+          {/* Email */}
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email address</label>
             <input
               id="email"
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className={errors.email ? 'form-input form-input-error' : 'form-input'}
               disabled={loading}
+              autoComplete="email"
             />
+            {errors.email && (
+              <span className="form-error">{errors.email}</span>
+            )}
           </div>
 
+          {/* Password */}
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <div className="form-group-header">
+              <label htmlFor="password">Password</label>
+              <button
+                type="button"
+                className="button button-text button-text-small"
+                disabled={true}
+                title="Password reset coming soon"
+              >
+                Forgot?
+              </button>
+            </div>
             <input
               id="password"
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className={errors.password ? 'form-input form-input-error' : 'form-input'}
               disabled={loading}
+              autoComplete="current-password"
             />
+            {errors.password && (
+              <span className="form-error">{errors.password}</span>
+            )}
           </div>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Logging in...' : 'Log in'}
+          {/* Submit Button */}
+          <button type="submit" className="button button-primary button-block" disabled={loading}>
+            {loading ? (
+              <>
+                <span className="spinner"></span>
+                Signing in...
+              </>
+            ) : (
+              'Sign in'
+            )}
           </button>
         </form>
 
+        {/* Footer */}
         <p className="auth-footer">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+          Don't have an account?{' '}
+          <Link to="/signup" className="button button-text">
+            Create one
+          </Link>
         </p>
       </div>
     </div>

@@ -16,13 +16,18 @@
       "Bash(git config *)",
       "Bash(git branch *)",
       "Bash(git remote *)",
-      "Bash(echo github-auth-configured)",
+      "Bash(echo git-token-configured)",
       "Bash(chmod 600 ~/.git-credentials)",
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(git reset *)",
-      "Bash(cd \"D:\\\\Claude\\\\Projects\\\\DocuStruct\" && rm -rf .git && git init && git config user.name \"Harsha OnlineJourny\" && git config user.email \"harsha@github.com\" && git branch -M main && git remote add origin https://github.com/HarshaOnlineJourny/docustruct.git && echo \"Git reinitialized\")"
+      "Bash(cd \"D:\\\\Claude\\\\Projects\\\\DocuStruct\" && rm -rf .git && git init && git config user.name \"Harsha OnlineJourny\" && git config user.email \"harsha@github.com\" && git branch -M main && git remote add origin https://github.com/HarshaOnlineJourny/docustruct.git && echo \"Git reinitialized\")",
+      "Bash(git push -u origin main)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@24.199.80.48 \"ls -la ~ && echo '---' && find ~ -maxdepth 3 -name 'docustruct' -o -name 'package.json' 2>/dev/null | head -20\")",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@24.199.80.48 \"find /opt /var/www /home /app -name 'package.json' 2>/dev/null | head -10\")",
+      "Bash(curl -s -I docustruct.theproapps.com)",
+      "Bash(curl -s -k https://docustruct.theproapps.com/dashboard)"
     ]
   }
 }
