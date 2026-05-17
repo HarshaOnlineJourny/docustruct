@@ -3,6 +3,11 @@ dist/
 .DS_Store
 *.log
 
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+
 # Local data
 server/data/docustruct.sqlite
 server/data/docustruct.sqlite-journal

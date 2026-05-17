@@ -9,6 +9,7 @@ import {
 import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
+import GithubCallback from './pages/GithubCallback.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Templates from './pages/Templates.jsx';
 import Training from './pages/Training.jsx';
@@ -189,6 +190,7 @@ function AppRoutes() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/auth/github/callback" element={<GithubCallback />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         )}

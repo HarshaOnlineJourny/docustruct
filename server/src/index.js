@@ -1,12 +1,16 @@
 // Express entrypoint. Mounts the route modules, serves uploaded PDFs, and —
 // in production — serves the built React client so a single Node process is
 // all you need behind nginx.
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { UPLOADS_DIR, SAMPLES_DIR } from './db.js';
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.env') });
 
 import authRouter from './routes/auth.js';
 import templatesRouter from './routes/templates.js';
@@ -66,9 +70,18 @@ app.use('/api/data', authenticate, dataRouter);
 app.use('/api/settings', authenticate, settingsRouter);
 app.use('/api/ai', authenticate, aiTemplatesRouter);
 
+// Serve the landing page for the root path (professional HTML template)
+const landingPagePath = path.resolve(__dirname, 'landing.html');
+if (fs.existsSync(landingPagePath)) {
+  app.get('/', (_req, res) => {
+    res.sendFile(landingPagePath);
+  });
+  console.log(`Landing page available at ${landingPagePath}`);
+}
+
 // Serve the built React client in production. The build lives at
 // `<repo>/client/dist`. Falls back to index.html for client-side routing
-// (so /dashboard, /templates, /login, /signup, / all resolve via React Router).
+// (so /dashboard, /templates, /login, /signup all resolve via React Router).
 const clientDist = path.resolve(__dirname, '..', '..', 'client', 'dist');
 if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist, { index: 'index.html' }));

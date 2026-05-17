@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../AuthContext.jsx';
 
 export default function Login() {
@@ -47,7 +48,6 @@ export default function Login() {
 
     try {
       await login(email, password);
-      // Navigate to dashboard on success (handled by AuthContext)
       navigate('/dashboard');
     } catch (err) {
       setErrors({ general: err.message || 'Login failed. Please check your credentials.' });
@@ -56,100 +56,348 @@ export default function Login() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: credentialResponse.credential }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Google login failed');
+      }
+
+      const data = await response.json();
+      const token = data.session;
+
+      // Store in localStorage
+      localStorage.setItem('session_token', token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('organization', JSON.stringify(data.organization));
+
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      setErrors({ general: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithubLogin = () => {
+    const clientId = process.env.REACT_APP_GITHUB_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/auth/github/callback`;
+
+    if (!clientId) {
+      setErrors({ general: 'GitHub OAuth not configured' });
+      return;
+    }
+
+    const scope = 'user:email';
+    const authorizeUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}`;
+    window.location.href = authorizeUrl;
+  };
+
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        {/* Brand */}
-        <div className="auth-brand">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="14" height="18" rx="2" stroke="#a5b4fc" strokeWidth="1.6" />
-            <path d="M8 8h6M8 12h6M8 16h4" stroke="#a5b4fc" strokeWidth="1.6" strokeLinecap="round" />
-            <path d="M14 7l6 3v8a3 3 0 0 1-3 3" stroke="#4f46e5" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="20" cy="9" r="1.5" fill="#4f46e5" />
-          </svg>
-          <h1>DocuStruct</h1>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9f8f6' }}>
+      {/* Left Side - Dark Content */}
+      <div style={{
+        flex: 1,
+        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+        color: 'white',
+        padding: '60px 40px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: '100vh',
+      }}>
+        <div style={{ maxWidth: '480px' }}>
+          <div style={{ fontSize: '12px', letterSpacing: '2px', color: 'rgba(255,255,255,0.6)', marginBottom: '20px', textTransform: 'uppercase' }}>
+            Welcome Back
+          </div>
+          <h1 style={{ fontSize: '48px', fontWeight: 700, lineHeight: '1.2', marginBottom: '30px' }}>
+            Pick up where the <em style={{ fontStyle: 'italic' }}>extractions</em> left off.
+          </h1>
+
+          <div style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            padding: '20px',
+            marginTop: '40px',
+          }}>
+            <p style={{ fontSize: '14px', fontStyle: 'italic', lineHeight: '1.6', marginBottom: '15px' }}>
+              "First run got us to 96% accuracy. The review queue did the rest."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                fontWeight: 600,
+              }}>
+                AC
+              </div>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 600 }}>Adaeze Chukwu</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>Director of Operations · Halstead Brokerage</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '40px', marginTop: '50px', fontSize: '13px' }}>
+            <div>
+              <div style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>2.1M+</div>
+              <div style={{ color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pages Processed</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>98.4%</div>
+              <div style={{ color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Field Accuracy</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>$0.06</div>
+              <div style={{ color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Avg. Cost / 400 pp</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div style={{
+        flex: 1,
+        padding: '60px 40px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        maxWidth: '500px',
+        margin: '0 auto',
+      }}>
+        <div style={{ marginBottom: '40px' }}>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px', color: '#1a1814' }}>
+            Sign in to Docustruct
+          </h2>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>
+            Welcome back. Drop the next PDF in seconds.
+          </p>
+        </div>
+
+        {/* OAuth Buttons */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          {process.env.REACT_APP_GOOGLE_CLIENT_ID ? (
+            <div style={{ flex: 1 }}>
+              <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setErrors({ general: 'Google login failed' })}
+                  theme="outline"
+                  size="large"
+                  width="100%"
+                />
+              </GoogleOAuthProvider>
+            </div>
+          ) : (
+            <button
+              disabled
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                background: '#f3f4f6',
+                color: '#9ca3af',
+                cursor: 'not-allowed',
+                fontSize: '14px',
+                fontWeight: 500,
+              }}
+            >
+              Google
+            </button>
+          )}
+          <button
+            onClick={handleGithubLogin}
+            disabled={loading}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              background: 'white',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              transition: 'all 0.2s',
+              opacity: loading ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#f8f9fa')}
+            onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = 'white')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v 3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            GitHub
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div style={{ position: 'relative', marginBottom: '24px' }}>
+          <div style={{ borderTop: '1px solid #e2e8f0' }} />
+          <div style={{
+            position: 'absolute',
+            top: '-12px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#f9f8f6',
+            padding: '0 8px',
+            fontSize: '12px',
+            color: '#94a3b8',
+            fontWeight: 500,
+          }}>
+            OR WITH EMAIL
+          </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="auth-form">
-          <h2>Sign in to your account</h2>
-          <p className="auth-form-subtitle">
-            Welcome back. Enter your details to get started.
-          </p>
-
+        <form onSubmit={handleSubmit}>
           {/* General error */}
           {errors.general && (
-            <div className="form-alert form-alert-error">
+            <div style={{
+              background: '#fee2e2',
+              border: '1px solid #fecaca',
+              borderRadius: '8px',
+              padding: '12px',
+              marginBottom: '20px',
+              fontSize: '14px',
+              color: '#991b1b',
+            }}>
               {errors.general}
             </div>
           )}
 
           {/* Email */}
-          <div className="form-group">
-            <label htmlFor="email">Email address</label>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: '#1a1814' }}>
+              Email
+            </label>
             <input
-              id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder="test@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={errors.email ? 'form-input form-input-error' : 'form-input'}
               disabled={loading}
-              autoComplete="email"
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                border: errors.email ? '1px solid #ef4444' : '1px solid #e2e8f0',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
             />
             {errors.email && (
-              <span className="form-error">{errors.email}</span>
+              <div style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>{errors.email}</div>
             )}
           </div>
 
           {/* Password */}
-          <div className="form-group">
-            <div className="form-group-header">
-              <label htmlFor="password">Password</label>
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 500, color: '#1a1814' }}>Password</label>
               <button
                 type="button"
-                className="button button-text button-text-small"
-                disabled={true}
+                style={{
+                  fontSize: '12px',
+                  color: '#4f46e5',
+                  cursor: 'not-allowed',
+                  opacity: 0.5,
+                  border: 'none',
+                  background: 'none',
+                  padding: 0,
+                }}
+                disabled
                 title="Password reset coming soon"
               >
                 Forgot?
               </button>
             </div>
             <input
-              id="password"
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={errors.password ? 'form-input form-input-error' : 'form-input'}
               disabled={loading}
-              autoComplete="current-password"
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                border: errors.password ? '1px solid #ef4444' : '1px solid #e2e8f0',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
             />
             {errors.password && (
-              <span className="form-error">{errors.password}</span>
+              <div style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>{errors.password}</div>
             )}
           </div>
 
+          {/* Keep signed in */}
+          <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input type="checkbox" id="remember" style={{ cursor: 'pointer' }} defaultChecked />
+            <label htmlFor="remember" style={{ fontSize: '14px', color: '#1a1814', cursor: 'pointer' }}>
+              Keep me signed in on this device
+            </label>
+          </div>
+
           {/* Submit Button */}
-          <button type="submit" className="button button-primary button-block" disabled={loading}>
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                Signing in...
-              </>
-            ) : (
-              'Sign in'
-            )}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: loading ? '#9ca3af' : '#1a1814',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => !loading && (e.target.style.background = '#2d2d2d')}
+            onMouseLeave={(e) => !loading && (e.target.style.background = '#1a1814')}
+          >
+            {loading ? '⏳ Signing in...' : '→ Sign in'}
           </button>
         </form>
 
         {/* Footer */}
-        <p className="auth-footer">
-          Don't have an account?{' '}
-          <Link to="/signup" className="button button-text">
-            Create one
+        <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#64748b' }}>
+          Already signed up?{' '}
+          <Link to="/signup" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 500 }}>
+            Sign in
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
