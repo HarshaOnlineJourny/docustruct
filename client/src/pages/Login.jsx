@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../AuthContext.jsx';
 
@@ -10,6 +10,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  // Check for OAuth callback errors
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      setErrors({ general: decodeURIComponent(error) });
+    }
+  }, [searchParams]);
 
   // Redirect if already authenticated
   useEffect(() => {
