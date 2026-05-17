@@ -70,14 +70,7 @@ app.use('/api/data', authenticate, dataRouter);
 app.use('/api/settings', authenticate, settingsRouter);
 app.use('/api/ai', authenticate, aiTemplatesRouter);
 
-// Serve the landing page for the root path (professional HTML template)
-const landingPagePath = path.resolve(__dirname, 'landing.html');
-if (fs.existsSync(landingPagePath)) {
-  app.get('/', (_req, res) => {
-    res.sendFile(landingPagePath);
-  });
-  console.log(`Landing page available at ${landingPagePath}`);
-}
+// Landing page is now served by React Router (Landing.jsx component)
 
 // Serve the built React client in production. The build lives at
 // `<repo>/client/dist`. Falls back to index.html for client-side routing

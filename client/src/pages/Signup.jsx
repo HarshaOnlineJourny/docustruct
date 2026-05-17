@@ -100,7 +100,7 @@ export default function Signup() {
   };
 
   const handleGithubSignup = () => {
-    const clientId = process.env.REACT_APP_GITHUB_CLIENT_ID;
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
     const redirectUri = `${window.location.origin}/auth/github/callback`;
 
     if (!clientId) {
@@ -193,11 +193,27 @@ export default function Signup() {
         maxWidth: '500px',
         margin: '0 auto',
       }}>
-        <div style={{ position: 'absolute', top: '20px', right: '40px', fontSize: '14px', color: '#64748b' }}>
-          Already signed up?{' '}
-          <Link to="/login" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 500 }}>
-            Sign in
-          </Link>
+        <div style={{ position: 'absolute', top: '20px', right: '40px', display: 'flex', gap: '16px', alignItems: 'center', fontSize: '14px' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              border: 'none',
+              background: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#64748b'}
+            onMouseLeave={(e) => e.target.style.color = '#94a3b8'}
+          >
+            ← Back
+          </button>
+          <div style={{ color: '#64748b' }}>
+            Already signed up?{' '}
+            <Link to="/login" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 500 }}>
+              Sign in
+            </Link>
+          </div>
         </div>
 
         <div style={{ marginBottom: '40px' }}>
@@ -211,9 +227,9 @@ export default function Signup() {
 
         {/* OAuth Buttons */}
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-          {process.env.REACT_APP_GOOGLE_CLIENT_ID ? (
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
             <div style={{ flex: 1 }}>
-              <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => setErrors({ general: 'Google signup failed' })}

@@ -90,7 +90,7 @@ export default function Login() {
   };
 
   const handleGithubLogin = () => {
-    const clientId = process.env.REACT_APP_GITHUB_CLIENT_ID;
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
     const redirectUri = `${window.location.origin}/auth/github/callback`;
 
     if (!clientId) {
@@ -194,9 +194,9 @@ export default function Login() {
 
         {/* OAuth Buttons */}
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-          {process.env.REACT_APP_GOOGLE_CLIENT_ID ? (
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
             <div style={{ flex: 1 }}>
-              <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => setErrors({ general: 'Google login failed' })}
@@ -393,10 +393,30 @@ export default function Login() {
 
         {/* Footer */}
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#64748b' }}>
-          Already signed up?{' '}
+          Don't have an account?{' '}
           <Link to="/signup" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 500 }}>
-            Sign in
+            Sign up
           </Link>
+        </div>
+
+        {/* Back Button */}
+        <div style={{ marginTop: '16px', textAlign: 'center' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              border: 'none',
+              background: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              fontSize: '14px',
+              padding: '8px',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#64748b'}
+            onMouseLeave={(e) => e.target.style.color = '#94a3b8'}
+          >
+            ← Back to home
+          </button>
         </div>
       </div>
     </div>
