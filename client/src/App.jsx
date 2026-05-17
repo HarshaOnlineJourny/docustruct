@@ -167,7 +167,7 @@ function AppRoutes() {
     return null; // Loading
   }
 
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/auth/github/callback';
   const isLandingPage = pathname === '/';
 
   // Redirect authenticated users away from auth pages
