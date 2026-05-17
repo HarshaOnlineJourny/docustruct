@@ -8,44 +8,62 @@ export default function GithubCallback() {
   useEffect(() => {
     const code = searchParams.get('code');
     const error = searchParams.get('error');
+    const error_description = searchParams.get('error_description');
 
     if (error) {
-      console.error('GitHub auth error:', error);
-      navigate('/login?error=' + encodeURIComponent(error));
+      const errorMsg = error_description || error;
+      console.error('GitHub auth error:', errorMsg);
+      navigate('/login?error=' + encodeURIComponent(errorMsg));
       return;
     }
 
-    if (code) {
-      // Exchange code for token on backend
-      (async () => {
-        try {
-          const response = await fetch('/api/auth/github', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'GitHub authentication failed');
-          }
-
-          const data = await response.json();
-          const token = data.session;
-
-          // Store in localStorage
-          localStorage.setItem('session_token', token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('organization', JSON.stringify(data.organization));
-
-          // Redirect to dashboard
-          navigate('/dashboard');
-        } catch (err) {
-          console.error('GitHub callback error:', err);
-          navigate('/login?error=' + encodeURIComponent(err.message));
-        }
-      })();
+    if (!code) {
+      console.error('No code received from GitHub');
+      navigate('/login?error=' + encodeURIComponent('No authorization code received from GitHub'));
+      return;
     }
+
+    // Exchange code for token on backend
+    (async () => {
+      try {
+        console.log('Exchanging GitHub code for session token...');
+        const response = await fetch('/api/auth/github', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+
+        console.log('GitHub API response status:', response.status);
+
+        if (!response.ok) {
+          let errorMsg = 'GitHub authentication failed';
+          try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorMsg;
+          } catch (e) {
+            // Response is not JSON
+            errorMsg = `GitHub auth failed: ${response.statusText}`;
+          }
+          throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+        console.log('GitHub auth successful, redirecting to dashboard');
+
+        const token = data.session;
+
+        // Store in localStorage
+        localStorage.setItem('session_token', token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('organization', JSON.stringify(data.organization));
+
+        // Redirect to dashboard
+        navigate('/dashboard');
+      } catch (err) {
+        console.error('GitHub callback error:', err.message);
+        navigate('/login?error=' + encodeURIComponent(err.message));
+      }
+    })();
   }, [searchParams, navigate]);
 
   return (
