@@ -66,18 +66,9 @@ app.use('/api/data', authenticate, dataRouter);
 app.use('/api/settings', authenticate, settingsRouter);
 app.use('/api/ai', authenticate, aiTemplatesRouter);
 
-// Serve the landing page for the root path
-const landingPagePath = path.resolve(__dirname, 'landing.html');
-if (fs.existsSync(landingPagePath)) {
-  app.get('/', (_req, res) => {
-    res.sendFile(landingPagePath);
-  });
-  console.log(`Landing page available at ${landingPagePath}`);
-}
-
 // Serve the built React client in production. The build lives at
 // `<repo>/client/dist`. Falls back to index.html for client-side routing
-// (so /dashboard, /templates, etc. all resolve via React Router).
+// (so /dashboard, /templates, /login, /signup, / all resolve via React Router).
 const clientDist = path.resolve(__dirname, '..', '..', 'client', 'dist');
 if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist, { index: 'index.html' }));
